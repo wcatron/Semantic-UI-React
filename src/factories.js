@@ -7,6 +7,22 @@ import Image from './elements/Image/Image'
 import Label from './elements/Label/Label'
 
 /**
+ * If the 'key' prop is not set, set it based on the childKey or getChildKey props.
+ *
+ * @param   {function} options.getChildKey Returns a key based on props
+ * @param   {string} options.childKey Given childKey
+ * @param   {object} options.props A props object
+ * @returns {object} A new props object
+ */
+const mergeChildKey = ({ getChildKey, childKey, ...props }) => {
+  if (!props.key) {
+    props.key = childKey || getChildKey && getChildKey(props)
+  }
+
+  return props
+}
+
+/**
  * Merges props and classNames.
  *
  * @param {object} props A props object
@@ -20,7 +36,7 @@ const mergePropsAndClassName = (props, extraProps) => {
     newProps.className = cx(props.className, extraProps.className) // eslint-disable-line react/prop-types
   }
 
-  return newProps
+  return mergeChildKey(newProps)
 }
 
 /**
