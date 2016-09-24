@@ -51,7 +51,6 @@ describe('Menu', () => {
     })
 
     it('is set when clicking an item', () => {
-      // random item, skip the first as its selected by default
       const randomIndex = _.random(items.length - 1)
 
       mount(<Menu items={items} />)
