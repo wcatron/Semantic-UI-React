@@ -739,7 +739,9 @@ export default class Dropdown extends Component {
 
   handleClose = () => {
     debug('handleClose()')
-    this._dropdown.blur()
+    if (this._dropdown && typeof this._dropdown.blur === 'function') {
+      this._dropdown.blur()
+    }
   }
 
   toggle = () => this.state.open ? this.close() : this.open()
