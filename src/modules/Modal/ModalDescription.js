@@ -2,6 +2,7 @@ import React, { PropTypes } from 'react'
 import cx from 'classnames'
 
 import {
+  createShorthandFactory,
   customPropTypes,
   getElementType,
   getUnhandledProps,
@@ -9,12 +10,12 @@ import {
 } from '../../lib'
 
 function ModalDescription(props) {
-  const { children, className } = props
+  const { children, className, content } = props
   const classes = cx(className, 'description')
   const rest = getUnhandledProps(ModalDescription, props)
   const ElementType = getElementType(ModalDescription, props)
 
-  return <ElementType {...rest} className={classes}>{children}</ElementType>
+  return <ElementType {...rest} className={classes}>{children || content}</ElementType>
 }
 
 ModalDescription._meta = {
@@ -32,6 +33,11 @@ ModalDescription.propTypes = {
 
   /** Additional classes. */
   className: PropTypes.string,
+
+  /** Shorthand for primary content. */
+  content: customPropTypes.contentShorthand,
 }
+
+ModalDescription.create = createShorthandFactory(ModalDescription, content => ({ content }))
 
 export default ModalDescription

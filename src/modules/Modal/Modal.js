@@ -41,6 +41,9 @@ class Modal extends Component {
     /** An element type to render as (string or function). */
     as: customPropTypes.as,
 
+    /** A modal can reduce its complexity */
+    basic: PropTypes.bool,
+
     /** Primary content. */
     children: PropTypes.node,
 
@@ -54,8 +57,8 @@ class Modal extends Component {
       PropTypes.bool,
     ]),
 
-    /** A modal can reduce its complexity */
-    basic: PropTypes.bool,
+    /** Shorthand for ModalContent. */
+    content: customPropTypes.contentShorthand,
 
     /** Initial value of open. */
     defaultOpen: PropTypes.bool,
@@ -65,6 +68,9 @@ class Modal extends Component {
       PropTypes.bool,
       PropTypes.oneOf(_meta.props.dimmer),
     ]),
+
+    /** Shorthand for ModalHeader. */
+    header: customPropTypes.contentShorthand,
 
     /** The node where the modal should mount.. */
     mountNode: PropTypes.any,
@@ -201,7 +207,7 @@ class Modal extends Component {
 
   render() {
     const { open } = this.state
-    const { basic, children, className, closeIcon, dimmer, mountNode, size } = this.props
+    const { basic, children, className, closeIcon, content, dimmer, header, mountNode, size } = this.props
 
     // Short circuit when server side rendering
     if (!isBrowser) return null
@@ -224,12 +230,24 @@ class Modal extends Component {
 
     const closeIconName = closeIcon === true ? 'close' : closeIcon
 
-    const modalJSX = (
-      <ElementType {...rest} className={classes} style={{ marginTop }} ref={c => (this._modalNode = c)}>
-        {Icon.create(closeIconName, { onClick: this.handleClose })}
-        {children}
-      </ElementType>
-    )
+    let modalJSX
+
+    if (children) {
+      modalJSX = (
+        <ElementType {...rest} className={classes} style={{ marginTop }} ref={c => (this._modalNode = c)}>
+          {Icon.create(closeIconName, { onClick: this.handleClose })}
+          {children}
+        </ElementType>
+      )
+    } else {
+      modalJSX = (
+        <ElementType {...rest} className={classes} style={{ marginTop }} ref={c => (this._modalNode = c)}>
+          {Icon.create(closeIconName, { onClick: this.handleClose })}
+          {ModalHeader.create(header)}
+          {ModalContent.create(content)}
+        </ElementType>
+      )
+    }
 
     // wrap dimmer modals
     const dimmerClasses = !dimmer ? null : cx(

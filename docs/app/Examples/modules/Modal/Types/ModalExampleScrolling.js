@@ -1,7 +1,7 @@
 import React from 'react'
 import { Button, Header, Icon, Image, Modal } from 'semantic-ui-react'
 
-const ModalScrollingExample = () => (
+const ModalExampleScrolling = () => (
   <Modal trigger={<Button>Long Modal</Button>}>
     <Modal.Header>Profile Picture</Modal.Header>
     <Modal.Content image>
@@ -27,5 +27,4 @@ const ModalScrollingExample = () => (
   </Modal>
 )
 
-export default ModalScrollingExample
-
+export default ModalExampleScrolling

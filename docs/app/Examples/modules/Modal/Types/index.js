@@ -12,6 +12,10 @@ const ModalExamples = () => (
       examplePath='modules/Modal/Types/ModalExampleModal'
     />
     <ComponentExample
+      description='A standard modal can be defined via shorthand.'
+      examplePath='modules/Modal/Types/ModalExampleModalShorthand'
+    />
+    <ComponentExample
       title='Basic'
       description='A modal can reduce its complexity.'
       examplePath='modules/Modal/Types/ModalExampleBasic'
