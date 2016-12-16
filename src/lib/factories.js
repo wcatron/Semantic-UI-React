@@ -9,7 +9,7 @@ import React, { cloneElement, isValidElement } from 'react'
  * A pure function that generates a unique child key hash code from an element's props.
  *
  * @param {object} props A ReactElement's props object.
- * @returns {number}
+ * @returns {string}
  */
 export const getChildKey = (props) => {
   const { key, childKey } = props
@@ -36,8 +36,10 @@ export const getChildKey = (props) => {
       || type === 'function' && (val.name || 'function')
       || Array.isArray(val) && ['[', val.join(','), ']'].join('')
       || val === null && 'null'
-      || type === 'object' && ['{', Object.keys(val).map(k => [k, ':', val[k]].join('')), '}'].join('')
+      || type === 'object' && ['{', ...Object.keys(val).join(','), '}'].join('')
       || val === undefined && 'undefined'
+      // covers react elements and unknowns
+      || type
 
     return [name, ':', valueString].join('')
   }).join(',')
