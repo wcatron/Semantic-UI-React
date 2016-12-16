@@ -85,8 +85,14 @@ export function createShorthand(Component, mapValueToProps, val, defaultProps = 
   // Merge props and className
   const props = { ...defaultProps, ...usersProps }
 
+  // merge className
   if (_.has(usersProps, 'className') || _.has(defaultProps.className)) {
     props.className = cx(defaultProps.className, usersProps.className) // eslint-disable-line react/prop-types
+  }
+
+  // merge style
+  if (_.isPlainObject(usersProps, 'style') && _.isPlainObject(defaultProps.style)) {
+    props.style = { ...defaultProps.style, ...usersProps.style } // eslint-disable-line react/prop-types
   }
 
   // Generate child key
