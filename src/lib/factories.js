@@ -3,47 +3,6 @@ import cx from 'classnames'
 import React, { cloneElement, isValidElement } from 'react'
 
 // ============================================================
-// Factory Utilities
-// ============================================================
-/**
- * A pure function that generates a unique child key hash code from an element's props.
- *
- * @param {object} props A ReactElement's props object.
- * @returns {number}
- */
-export const getChildKey = (props) => {
-  const { key, childKey } = props
-
-  // already defines a key
-  if (key) return key
-
-  // defines a childKey function or value
-  if (childKey) return typeof childKey === 'function' ? childKey(props) : childKey
-
-  // 1. Stringify props to a short as possible run on string of key/values.
-  // 2. Don't stringify entire functions, use the function name || 'f'.
-  // 3. Generate a short hash number from the string.
-  //     props  : { color: 'red', onClick: handleClick }
-  //     string : 'color:"red",onClick:handleClick'
-  //     hash   : 110042245
-  return Object.keys(props).map(name => {
-    const val = props[name]
-    const type = typeof val
-
-    const valueString = type === 'string' && val
-      || type === 'number' && val
-      || type === 'boolean' && (val ? 'true' : 'false')
-      || type === 'function' && (val.name || 'function')
-      || Array.isArray(val) && ['[', val.join(','), ']'].join('')
-      || val === null && 'null'
-      || type === 'object' && ['{', Object.keys(val).map(k => [k, ':', val[k]].join('')), '}'].join('')
-      || val === undefined && 'undefined'
-
-    return [name, ':', valueString].join('')
-  }).join(',')
-}
-
-// ============================================================
 // Factories
 // ============================================================
 
@@ -63,49 +22,72 @@ export function createShorthand(Component, mapValueToProps, val, defaultProps = 
   }
   // short circuit for disabling shorthand
   if (val === null) return null
+  const valIsString = _.isString(val)
+  const valIsNumber = _.isNumber(val)
 
   const isReactElement = isValidElement(val)
   const isPropsObject = _.isPlainObject(val)
-  const isPrimitiveValue = _.isString(val) || _.isNumber(val) || _.isArray(val)
+  const isPrimitiveValue = valIsString || valIsNumber || _.isArray(val)
 
   // ----------------------------------------
   // Build up props
   // ----------------------------------------
+  let finalProps = {}
 
   // User's props
-  const usersProps = isReactElement && val.props
-    || isPropsObject && val
+  const usersProps = isReactElement && { ...val.props }
+    || isPropsObject && { ...val }
     || isPrimitiveValue && mapValueToProps(val)
 
   // Default props
-  defaultProps = _.isFunction(defaultProps) ? defaultProps(usersProps) : defaultProps
+  if (_.isFunction(defaultProps)) {
+    defaultProps = _.isFunction(defaultProps) ? defaultProps(usersProps) : defaultProps
 
-  // Merge props and className
-  const props = { ...defaultProps, ...usersProps }
+    // Merge props
+    finalProps = { ...defaultProps, ...usersProps }
 
-  if (_.has(usersProps, 'className') || _.has(defaultProps.className)) {
-    props.className = cx(defaultProps.className, usersProps.className) // eslint-disable-line react/prop-types
+    // Merge className
+    if (usersProps.className && defaultProps.className) {
+      finalProps.className = cx(defaultProps.className, usersProps.className)
+    }
+
+    // Merge style
+    if (usersProps.style && defaultProps.style) {
+      finalProps.style = { ...defaultProps.style, ...usersProps.style }
+    }
   }
 
-  // Generate child key
-  if (generateKey) props.key = getChildKey(props) // eslint-disable-line react/prop-types
+  // ----------------------------------------
+  // Get key
+  // ----------------------------------------
+
+  // Use key, childKey, or generate key
+  if (!finalProps.key) {
+    const { childKey } = finalProps
+
+    if (childKey) {
+      finalProps.key = typeof childKey === 'function' ? childKey(finalProps) : childKey
+    } else if (generateKey && (valIsString || valIsNumber)) {
+      finalProps.key = val
+    }
+  }
 
   // ----------------------------------------
   // Create Element
   // ----------------------------------------
 
   // Clone ReactElements
-  if (isReactElement) return cloneElement(val, props)
+  if (isReactElement) return cloneElement(val, finalProps)
 
   // Create ReactElements from built up props
-  if (isPrimitiveValue || isPropsObject) return <Component {...props} />
+  if (isPrimitiveValue || isPropsObject) return <Component {...finalProps} />
 
   // Otherwise null
   return null
 }
 
 // ============================================================
-// Factories Creators
+// Factory Creators
 // ============================================================
 
 export function createShorthandFactory(Component, mapValueToProps, generateKey) {

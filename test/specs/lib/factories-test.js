@@ -5,6 +5,7 @@ import { sandbox } from 'test/utils'
 import {
   createShorthand,
   createShorthandFactory,
+  getChildKey,
 } from 'src/lib'
 
 // ----------------------------------------
@@ -198,6 +199,34 @@ describe('factories', () => {
         shallow(getShorthand({ value, mapValueToProps, defaultProps }))
 
         defaultProps.should.have.been.calledWith(mapValueToProps(value))
+      })
+    })
+
+    describe.only('key', () => {
+      it('can use the `key`', () => {
+        getChildKey({ key: 'foo' }).should.equal('foo')
+      })
+      it('can use the `childKey`', () => {
+        getChildKey({ childKey: 'foo' }).should.equal('foo')
+      })
+      it('calls `childKey` with `props` if it is a function', () => {
+        const props = { foo: 'foo', childKey: sandbox.spy((props) => props.foo) }
+
+        const key = getChildKey(props)
+
+        props.childKey.should.have.been.calledOnce()
+        props.childKey.should.have.been.calledWithExactly(props)
+
+        key.should.equal('foo')
+      })
+      it('uses the string value as a key', () => {
+        getChildKey(props).should.equal('foo')
+      })
+      it('uses the number value as a key', () => {
+        getChildKey(props).should.equal('foo')
+      })
+      it('uses the number value as a key', () => {
+        getChildKey(props).should.equal('foo')
       })
     })
 
